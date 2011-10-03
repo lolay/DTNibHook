@@ -114,13 +114,10 @@ NSInteger const DTNibHookFailNumber = -1911;
 		
 		const char *propertyName = property_getName(property);
 		
-		NSString *nameString = [[NSString alloc] initWithCString:propertyName];
-		
+        NSString *nameString = [NSString stringWithUTF8String:propertyName];
+
 		if (![nameString isEqualToString:@"view"])
 			[tempList addObject:nameString];
-		
-		[nameString release];
-		
 	}
 	
 	free(properties);

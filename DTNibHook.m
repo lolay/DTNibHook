@@ -37,6 +37,7 @@
 
 #import "DTNibHook.h"
 #import <objc/runtime.h>
+#import <objc/message.h>
 
 @interface DTNibHook ()
 
@@ -62,7 +63,7 @@ NSInteger const DTNibHookFailNumber = -1911;
 }
 
 + (id)nibHookWithNibName:(NSString *)nibName bundle:(NSBundle *)bundle {
-	return [[[self alloc] initWithNibName:nibName bundle:bundle] autorelease];
+	return [[self alloc] initWithNibName:nibName bundle:bundle];
 }
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)bundle {
@@ -80,25 +81,19 @@ NSInteger const DTNibHookFailNumber = -1911;
 }
 
 + (id)nibHookWithView:(UIView *)aView {
-	return [[[self alloc] initWithView:aView] autorelease];
+	return [[self alloc] initWithView:aView];
 }
 
 - (id)initWithView:(UIView *)aView {
 	
 	if (!(self = [super init])) return nil;
 	
-	view = [aView retain];
+	view = aView;
 	
 	[self generatePropertyList];
 	[self hookPropertiesToIBTags];
 	
 	return self;
-}
-
-- (void)dealloc {
-	[propertyList release], propertyList = nil;
-	[view release], view = nil;
-	[super dealloc];
 }
 
 - (void)generatePropertyList {
@@ -122,11 +117,7 @@ NSInteger const DTNibHookFailNumber = -1911;
 	
 	free(properties);
 	
-	NSArray *old = propertyList;
 	propertyList = [[NSArray alloc] initWithArray:tempList];
-	[old release], old = nil;
-	
-	[tempList release];
 	
 	self.view.tag = DTNibHookMainViewTag;
 	
@@ -143,7 +134,7 @@ NSInteger const DTNibHookFailNumber = -1911;
 		
 		SEL getSelector = sel_registerName(cString);
 		
-		UIView *v = [self performSelector:getSelector];
+		UIView *v = objc_msgSend(self, getSelector);
 		v.tag = [self hookTagForPropertyName:name];
 		
 	}
@@ -165,8 +156,8 @@ NSInteger const DTNibHookFailNumber = -1911;
 		
 		UIView *v = [self.view viewWithTag:[self hookTagForPropertyName:name]];
 		
-		[self performSelector:setSelector withObject:v];
-		
+        objc_msgSend(self, setSelector, v);
+        
 	}
 	
 }
@@ -189,7 +180,7 @@ NSInteger const DTNibHookFailNumber = -1911;
 		
 		SEL getSelector = sel_registerName(cString);
 		
-		UIView *v = [self performSelector:getSelector];
+        objc_msgSend(self, getSelector);
 		
 		NSLog(@"%@: %@(%i) %@", self, name, v.tag, v);
 		

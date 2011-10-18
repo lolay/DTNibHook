@@ -182,8 +182,6 @@ NSInteger const DTNibHookFailNumber = -1911;
 		
         objc_msgSend(self, getSelector);
 		
-		NSLog(@"%@: %@(%i) %@", self, name, v.tag, v);
-		
 	}
 }
 
